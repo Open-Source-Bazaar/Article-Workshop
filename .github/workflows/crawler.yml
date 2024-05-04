@@ -1,0 +1,46 @@
+name: Fetch Web pages
+on:
+  issues:
+    types:
+      - labeled
+jobs:
+  Fetch-and-Save:
+    if: github.event.label.name == 'crawler'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: freeCodeCamp-China/article-webpage-to-markdown-action@v1
+        with:
+          newsLink: "${{ github.event.issue.Body }}"
+          markDownFilePath: "./translation/"
+          githubToken: ${{ github.token }}
+
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "${{ github.event.issue.title }}"
+
+      # The following step is a notification example, you can replace it with your own notification action
+      - name: Lark notification
+        uses: foxundermoon/feishu-action@v2
+        with:
+          url: ${{ secrets.LARK_CHATBOT_HOOK_URL }}
+          msg_type: post
+          content: |
+            post:
+              en_us:
+                title: GitHub articles crawling
+                content:
+                  - - tag: text
+                      text: "Submitter: "
+                    - tag: a
+                      text: ${{ github.event.issue.user.login }}
+                      href: ${{ github.server_url }}/${{ github.event.issue.user.login }}
+                  - - tag: text
+                      text: "Issue: "
+                    - tag: a
+                      text: ${{ github.server_url }}/${{ github.repository }}/issues/${{ github.event.issue.number }}
+                      href: ${{ github.server_url }}/${{ github.repository }}/issues/${{ github.event.issue.number }}

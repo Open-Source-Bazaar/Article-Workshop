@@ -2,6 +2,8 @@ name: Format Markdown files
 
 on:
   push:
+    paths:
+      - "translation/**"
 
 jobs:
   Lint-and-Format:

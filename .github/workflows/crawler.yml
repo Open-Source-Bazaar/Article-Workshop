@@ -13,10 +13,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: freeCodeCamp-China/article-webpage-to-markdown-action@v1
+      - id: issue-parser
+        uses: stefanbuck/github-issue-parser@v3
         with:
-          newsLink: "${{ github.event.issue.Body }}"
-          markDownFilePath: "./translation/"
+          template-path: ".github/ISSUE_TEMPLATE/crawler.yml"
+
+      - uses: freeCodeCamp-China/article-webpage-to-markdown-action@v2
+        with:
+          pageURL: "${{ steps.issue-parser.outputs.issueparser_page_link  }}"
+          markdownFolder: "./translation/"
           githubToken: ${{ github.token }}
 
       - uses: stefanzweifel/git-auto-commit-action@v5
